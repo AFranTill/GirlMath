@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Girl Math - Login</title>
+    <link rel="stylesheet" href="style.css" />
+    
+  </head>
+  <body>
+    <main class="login-container">
+      <h1>Girl Math</h1>
+      <p>Sign in to continue to your account.</p>
+      <form action="/login" method="post">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter password" required />
+        </div>
+        <button class="login-button" type="submit">Log In</button>
+      </form>
+      <div class="login-footer">
+        <p>Forgot your password? <a href="#">Reset it</a></p>
+      </div>
+    </main>
+  </body>
+</html>
