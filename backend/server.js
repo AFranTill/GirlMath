@@ -61,6 +61,7 @@ app.get('/api/payments/transfers', requireAuth, async (req, res) => {
       .from('transactions')
       .select('id, transaction_date, amount, direction, description, counterparty, transaction_type, user_id')
       .eq('transaction_type', 'TRANSFER')
+       .eq('direction', 'credit') 
       .order('transaction_date', { ascending: false });
 
     if (error) {
@@ -72,7 +73,7 @@ app.get('/api/payments/transfers', requireAuth, async (req, res) => {
       id: transaction.id,
       name: transaction.counterparty || 'Unknown',
       amount: Math.abs(transaction.amount),
-      paid: transaction.direction === 'credit', // credit = money received
+      paid: true, // All transfers show as paid
       paidDate: transaction.transaction_date ? new Date(transaction.transaction_date).toLocaleDateString('en-NZ', { year: '2-digit', month: 'short', day: 'numeric' }) : null,
       raw: transaction, // Include raw data for debugging
     }));
