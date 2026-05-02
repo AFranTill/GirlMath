@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { GlassCard } from "../components/shared/GlassCard";
 import { StatusAvatar } from "../components/shared/StatusAvatar";
 import { StarIcon } from "../components/shared/StarIcon";
 import { StreakFlame } from "../components/shared/StreakFlame";
 import { Button } from "../components/ui/button";
 import { FileDown, Star, TrendingUp, User as UserIcon } from "lucide-react";
+import { supabase } from "../../lib/supabaseClient";
 
 const vouches = [
   { name: "Sam Taylor", quote: "Reliable payer, great flatmate!" },
@@ -12,14 +14,50 @@ const vouches = [
 ];
 
 export function Profile() {
+  const [stars, setStars] = useState<number | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadStars() {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !sessionData.session?.user?.id) {
+        setError("Not logged in");
+        setLoading(false);
+        return;
+      }
+
+      const userId = sessionData.session.user.id;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("email, star")
+        .eq("auth_user_id", userId)
+        .maybeSingle();
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setStars(data?.star ?? 0);
+        setEmail(data?.email ?? null);
+      }
+      setLoading(false);
+    }
+
+    loadStars();
+  }, []);
+
   return (
     <div className="p-8 space-y-6 max-w-screen-xl mx-auto">
       <div className="flex flex-col items-center pt-8">
         <div className="relative">
           <div className="absolute -inset-2 bg-gradient-to-r from-[#e19696] via-[#f7c884] to-[#e19696] rounded-full blur-lg opacity-75"></div>
-          <StatusAvatar name="Alex Kim" status="safe" size="lg" />
+          <StatusAvatar name={email ? email.split('@')[0].split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') : "User"} status="safe" size="lg" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mt-4">Alex Kim</h1>
+        <h1 className="text-2xl font-bold text-slate-800 mt-4">{email ? email.split('@')[0].split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') : "User"}</h1>
         <div className="flex items-center gap-2 mt-2">
           <div className="px-3 py-1 bg-gradient-to-r from-[#e19696] to-[#f7c884] rounded-full">
             <span className="text-white font-semibold text-sm">Gold Renter</span>
@@ -32,7 +70,9 @@ export function Profile() {
         <GlassCard className="bg-[#f7c884]/10">
           <div className="flex flex-col items-center text-center">
             <Star className="w-8 h-8 mb-2 text-amber-500" />
-            <div className="text-2xl font-bold text-slate-800">58</div>
+            <div className="text-2xl font-bold text-slate-800">
+              {loading ? "..." : error ? "Error" : stars}
+            </div>
             <div className="text-xs text-slate-600">Total Stars</div>
           </div>
         </GlassCard>

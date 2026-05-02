@@ -1,11 +1,38 @@
+import { useEffect, useState } from "react";
 import { GlassCard } from "../components/shared/GlassCard";
 import { StatusAvatar } from "../components/shared/StatusAvatar";
 import { Progress } from "../components/ui/progress";
 import { Button } from "../components/ui/button";
 import { AlertCircle, Bell } from "lucide-react";
 import { Link } from "react-router";
+import { supabase } from "../../lib/supabaseClient";
 
 export function Dashboard() {
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadUsers() {
+      const { data, error } = await supabase
+        .from("users")
+        .select("email")
+        .order("email");
+
+      if (error) {
+        console.error("Error loading users:", error);
+      } else {
+        setUsers(data || []);
+      }
+    }
+
+    loadUsers();
+  }, []);
+
+  const paidCount = Math.min(2, users.length);
+  const totalUsers = users.length;
+  const totalAmount = totalUsers * 250;
+  const paidAmount = paidCount * 250;
+  const progressValue = totalUsers > 0 ? (paidCount / totalUsers) * 100 : 0;
+
   return (
     <div className="p-8 space-y-6">
       <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg flex items-start gap-3">
@@ -13,7 +40,7 @@ export function Dashboard() {
         <div className="flex-1">
           <p className="font-semibold text-amber-900">Rent due in 5 days</p>
           <p className="text-sm text-amber-700">
-            Alex still needs to pay their share ($800)
+            {totalUsers > paidCount ? `${users[paidCount]?.email.split('@')[0] || 'Someone'} still needs to pay their share ($250)` : 'All rent payments are up to date'}
           </p>
         </div>
       </div>
@@ -25,36 +52,32 @@ export function Dashboard() {
               <h3 className="font-semibold text-slate-800 mb-4">Rent Payment</h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-slate-600">2/3 paid</span>
-                  <span className="font-semibold text-slate-800">$1,600 / $2,400</span>
+                  <span className="text-slate-600">{paidCount}/{totalUsers} paid</span>
+                  <span className="font-semibold text-slate-800">${paidAmount} / ${totalAmount}</span>
                 </div>
-                <Progress value={66.67} className="h-3" />
+                <Progress value={progressValue} className="h-3" />
 
                 <div className="space-y-2 mt-4">
-                  <div className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <StatusAvatar name="Jordan Lee" status="safe" size="sm" />
-                      <span className="text-sm text-slate-700">Jordan</span>
-                    </div>
-                    <span className="text-xs text-emerald-600 font-semibold">Paid</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <StatusAvatar name="Morgan Ellis" status="safe" size="sm" />
-                      <span className="text-sm text-slate-700">Morgan</span>
-                    </div>
-                    <span className="text-xs text-emerald-600 font-semibold">Paid</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-amber-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <StatusAvatar name="Alex Kim" status="pending" size="sm" />
-                      <span className="text-sm text-slate-700">Alex</span>
-                    </div>
-                    <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
-                      <Bell className="w-3 h-3" />
-                      Ping
-                    </Button>
-                  </div>
+                  {users.map((user, index) => {
+                    const name = user.email.split('@')[0];
+                    const isPaid = index < paidCount;
+                    return (
+                      <div key={user.email} className={`flex items-center justify-between p-2 ${isPaid ? 'bg-emerald-50' : 'bg-amber-50'} rounded-lg`}>
+                        <div className="flex items-center gap-2">
+                          <StatusAvatar name={name} status={isPaid ? "safe" : "pending"} size="sm" />
+                          <span className="text-sm text-slate-700">{name}</span>
+                        </div>
+                        {isPaid ? (
+                          <span className="text-xs text-emerald-600 font-semibold">Paid</span>
+                        ) : (
+                          <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
+                            <Bell className="w-3 h-3" />
+                            Ping
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </GlassCard>
