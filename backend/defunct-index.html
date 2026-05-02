@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head><title>Auth Test</title></head>
+<body>
+  <input id="email" placeholder="Email" />
+  <input id="password" placeholder="Password" type="password" />
+  <button onclick="signUp()">Sign Up</button>
+  <button onclick="logIn()">Log In</button>
+  <button onclick="callAPI()">Call Protected API</button>
+  <pre id="output"></pre>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyAHJAtQBsu8Q3caeL-OosrFAoxzOyiG4VQ",
+      authDomain: "girlmath-5ceba.firebaseapp.com",
+      projectId: "girlmath-5ceba",
+      storageBucket: "girlmath-5ceba.firebasestorage.app",
+      messagingSenderId: "664776394529",
+      appId: "1:664776394529:web:7c8c742a693be94d70e060",
+      measurementId: "G-WRXCKW88RK"
+    });
+
+    const auth = firebase.auth();
+    const output = document.getElementById('output');
+
+    function getFields() {
+      return {
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      };
+    }
+
+    async function signUp() {
+      const { email, password } = getFields();
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        output.textContent = 'Signed up & logged in!';
+      } catch (e) {
+        output.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    async function logIn() {
+      const { email, password } = getFields();
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        output.textContent = 'Logged in!';
+      } catch (e) {
+        output.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    async function callAPI() {
+      try {
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch('http://localhost:3000/api/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        output.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) output.textContent = `Logged in as: ${user.email}`;
+    });
+  </script>
+</body>
+</html>
