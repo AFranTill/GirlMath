@@ -14,20 +14,25 @@ export function Dashboard() {
     async function loadUsers() {
       const { data, error } = await supabase
         .from("users")
-        .select("email")
-        .order("email");
+        .select("email, first_name");
 
       if (error) {
         console.error("Error loading users:", error);
       } else {
-        setUsers(data || []);
+        // Sort users alphabetically by display name (first_name or email prefix)
+        const sortedUsers = (data || []).sort((a, b) => {
+          const nameA = a.first_name || a.email.split('@')[0];
+          const nameB = b.first_name || b.email.split('@')[0];
+          return nameA.localeCompare(nameB);
+        });
+        setUsers(sortedUsers);
       }
     }
 
     loadUsers();
   }, []);
 
-  const paidCount = Math.min(2, users.length);
+  const paidCount = Math.min(1, users.length);
   const totalUsers = users.length;
   const totalAmount = totalUsers * 250;
   const paidAmount = paidCount * 250;
@@ -40,7 +45,7 @@ export function Dashboard() {
         <div className="flex-1">
           <p className="font-semibold text-amber-900">Rent due in 5 days</p>
           <p className="text-sm text-amber-700">
-            {totalUsers > paidCount ? `${users[paidCount]?.email.split('@')[0] || 'Someone'} still needs to pay their share ($250)` : 'All rent payments are up to date'}
+            {totalUsers > paidCount ? `${users[paidCount]?.first_name || users[paidCount]?.email.split('@')[0] || 'Someone'} still needs to pay their share ($250)` : 'All rent payments are up to date'}
           </p>
         </div>
       </div>
@@ -59,7 +64,7 @@ export function Dashboard() {
 
                 <div className="space-y-2 mt-4">
                   {users.map((user, index) => {
-                    const name = user.email.split('@')[0];
+                    const name = user.first_name || user.email.split('@')[0];
                     const isPaid = index < paidCount;
                     return (
                       <div key={user.email} className={`flex items-center justify-between p-2 ${isPaid ? 'bg-emerald-50' : 'bg-amber-50'} rounded-lg`}>
