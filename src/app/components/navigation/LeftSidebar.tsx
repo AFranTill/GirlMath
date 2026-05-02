@@ -4,6 +4,7 @@ import { Home, DollarSign, Zap, ShoppingCart, Trophy, User, LogOut, Star } from 
 import { Button } from "../ui/button";
 import { GlassCard } from "../shared/GlassCard";
 import { supabase } from "../../../lib/supabaseClient";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { path: "/app", icon: Home, label: "Home" },
@@ -21,7 +22,7 @@ export function LeftSidebar() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+    useEffect(() => {
     async function loadStars() {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
@@ -84,6 +85,7 @@ export function LeftSidebar() {
                   {loading ? "..." : error ? "!" : stars}
                 </span>
               )}
+
             </Link>
           );
         })}

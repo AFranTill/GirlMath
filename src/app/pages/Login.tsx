@@ -55,9 +55,7 @@ export function Login() {
     }
 
     setUserEmail(data.user?.email ?? null);
-    setStatus(
-      "Sign up complete. Check your email to verify before signing in."
-    );
+    setStatus("Sign up complete. Check your email to verify before signing in.");
   }
 
   async function signOut() {
@@ -100,11 +98,23 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-12">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-lg p-8 border border-slate-200">
+    <div
+      className="min-h-screen flex items-center justify-center px-6 py-12"
+      style={{ backgroundColor: "#EEEBE3" }}
+    >
+      <div
+        className="max-w-md w-full rounded-3xl p-8 border"
+        style={{
+          backgroundColor: "#ffffff",
+          borderColor: "#d6d2c9",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+        }}
+      >
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-slate-900">FlatTrack Login</h1>
-          <p className="text-sm text-slate-500 mt-2">
+          <h1 className="text-3xl font-bold" style={{ color: "#000000" }}>
+            FlatTrack Login
+          </h1>
+          <p className="text-sm mt-2" style={{ color: "#6b6760" }}>
             Use your Supabase account to sign in and connect to the backend.
           </p>
         </div>
@@ -112,11 +122,11 @@ export function Login() {
         <div className="flex gap-2 mb-6">
           <button
             type="button"
-            className={
-              "flex-1 py-3 rounded-2xl font-semibold " +
-              (mode === "login"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600")
+            className="flex-1 py-3 rounded-2xl font-semibold transition-colors"
+            style={
+              mode === "login"
+                ? { backgroundColor: "#CA0013", color: "#ffffff" }
+                : { backgroundColor: "#EEEBE3", color: "#000000" }
             }
             onClick={() => setMode("login")}
           >
@@ -124,11 +134,11 @@ export function Login() {
           </button>
           <button
             type="button"
-            className={
-              "flex-1 py-3 rounded-2xl font-semibold " +
-              (mode === "signup"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600")
+            className="flex-1 py-3 rounded-2xl font-semibold transition-colors"
+            style={
+              mode === "signup"
+                ? { backgroundColor: "#CA0013", color: "#ffffff" }
+                : { backgroundColor: "#EEEBE3", color: "#000000" }
             }
             onClick={() => setMode("signup")}
           >
@@ -137,73 +147,103 @@ export function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium" style={{ color: "#000000" }}>
             Email
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="mt-2 w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2"
+              style={{
+                border: "1px solid #c8c4bc",
+                backgroundColor: "#EEEBE3",
+                color: "#000000",
+                // @ts-ignore
+                "--tw-ring-color": "#CA0013",
+              }}
               placeholder="you@example.com"
             />
           </label>
 
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium" style={{ color: "#000000" }}>
             Password
             <input
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="mt-2 w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2"
+              style={{
+                border: "1px solid #c8c4bc",
+                backgroundColor: "#EEEBE3",
+                color: "#000000",
+                // @ts-ignore
+                "--tw-ring-color": "#CA0013",
+              }}
               placeholder="Enter a secure password"
             />
           </label>
 
           {error ? (
-            <div className="text-sm text-red-600">{error}</div>
+            <div className="text-sm" style={{ color: "#CA0013" }}>
+              {error}
+            </div>
           ) : null}
           {status ? (
-            <div className="text-sm text-emerald-600">{status}</div>
+            <div className="text-sm" style={{ color: "#1a7a3c" }}>
+              {status}
+            </div>
           ) : null}
 
-          <Button className="w-full py-3" type="submit">
+          <button
+            type="submit"
+            className="w-full py-3 rounded-2xl font-semibold transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "#CA0013", color: "#ffffff" }}
+          >
             {mode === "login" ? "Log in" : "Create account"}
-          </Button>
+          </button>
         </form>
 
         {userEmail ? (
-          <div className="space-y-3">
-            <div className="text-sm text-slate-600">
+          <div className="space-y-3 mt-4">
+            <div className="text-sm" style={{ color: "#000000" }}>
               Logged in as <span className="font-semibold">{userEmail}</span>
             </div>
-            <Button
+            <button
               type="button"
-              variant="outline"
-              className="w-full py-3"
+              className="w-full py-3 rounded-2xl font-semibold border transition-colors hover:opacity-80"
+              style={{
+                backgroundColor: "#ffffff",
+                color: "#000000",
+                borderColor: "#000000",
+              }}
               onClick={signOut}
             >
               Log out
-            </Button>
+            </button>
           </div>
         ) : null}
 
-        <div className="mt-6 border-t border-slate-200 pt-6 space-y-4">
-          <Button
+        <div className="mt-6 pt-6 space-y-4" style={{ borderTop: "1px solid #d6d2c9" }}>
+          <button
             type="button"
-            variant="outline"
-            className="w-full py-3"
+            className="w-full py-3 rounded-2xl font-semibold border transition-colors hover:opacity-80"
+            style={{
+              backgroundColor: "#ffffff",
+              color: "#000000",
+              borderColor: "#000000",
+            }}
             onClick={testBackend}
           >
             Test backend auth
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            variant="secondary"
-            className="w-full py-3"
+            className="w-full py-3 rounded-2xl font-semibold transition-colors hover:opacity-80"
+            style={{ backgroundColor: "#EEEBE3", color: "#000000" }}
             onClick={() => navigate("/app")}
           >
             Continue without login
-          </Button>
+          </button>
         </div>
       </div>
     </div>

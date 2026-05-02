@@ -39,107 +39,232 @@ export function Dashboard() {
   const progressValue = totalUsers > 0 ? (paidCount / totalUsers) * 100 : 0;
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+    <div className="p-8 space-y-6" style={{ backgroundColor: "#EEEBE3", minHeight: "100vh" }}>
+      {/* Alert Banner */}
+      <div
+        style={{
+          backgroundColor: "#fff",
+          border: "1.5px solid #CA0013",
+          borderRadius: "16px",
+          boxShadow: "0 4px 24px rgba(202,0,19,0.10), 0 1.5px 4px rgba(0,0,0,0.07)",
+        }}
+        className="p-4 flex items-start gap-3"
+      >
+        <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "#CA0013" }} />
         <div className="flex-1">
-          <p className="font-semibold text-amber-900">Rent due in 5 days</p>
-          <p className="text-sm text-amber-700">
-            {totalUsers > paidCount ? `${users[paidCount]?.first_name || users[paidCount]?.email.split('@')[0] || 'Someone'} still needs to pay their share ($250)` : 'All rent payments are up to date'}
+          <p className="font-bold" style={{ color: "#000" }}>
+            Rent due in 5 days
+          </p>
+          <p className="text-sm" style={{ color: "#000", opacity: 0.55 }}>
+            {totalUsers > paidCount
+              ? `${users[paidCount]?.email.split("@")[0] || "Someone"} still needs to pay their share ($250)`
+              : "All rent payments are up to date"}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 space-y-6">
+        <div className="col-span-2 space-y-10">
+          {/* Rent Card */}
           <Link to="/app/rent">
-            <GlassCard hover className="border-[#e19696]/30">
-              <h3 className="font-semibold text-slate-800 mb-4">Rent Payment</h3>
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "24px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06)",
+                border: "1px solid rgba(0,0,0,0.07)",
+                transition: "box-shadow 0.2s ease, transform 0.2s ease",
+              }}
+              className="p-6 cursor-pointer hover:shadow-[0_16px_48px_rgba(0,0,0,0.13)] hover:-translate-y-0.5"
+            >
+              <h3 className="font-bold mb-4" style={{ color: "#000", letterSpacing: "-0.02em", fontSize: "1.05rem" }}>
+                Rent Payment
+              </h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-slate-600">{paidCount}/{totalUsers} paid</span>
-                  <span className="font-semibold text-slate-800">${paidAmount} / ${totalAmount}</span>
+                  <span style={{ color: "#000", opacity: 0.45 }}>{paidCount}/{totalUsers} paid</span>
+                  <span className="font-bold" style={{ color: "#000" }}>${paidAmount} / ${totalAmount}</span>
                 </div>
-                <Progress value={progressValue} className="h-3" />
+                <div style={{ backgroundColor: "#EEEBE3", borderRadius: "99px" }} className="h-2.5 overflow-hidden">
+                  <div
+                    style={{
+                      backgroundColor: "#CA0013",
+                      width: `${progressValue}%`,
+                      borderRadius: "99px",
+                      boxShadow: "0 2px 8px rgba(202,0,19,0.35)",
+                    }}
+                    className="h-full"
+                  />
+                </div>
 
                 <div className="space-y-2 mt-4">
                   {users.map((user, index) => {
-                    const name = user.first_name || user.email.split('@')[0];
+                    const name = user.first_name || user.email.split("@")[0];
                     const isPaid = index < paidCount;
+                    const initial = name.charAt(0).toUpperCase();
+
                     return (
-                      <div key={user.email} className={`flex items-center justify-between p-2 ${isPaid ? 'bg-emerald-50' : 'bg-amber-50'} rounded-lg`}>
-                        <div className="flex items-center gap-2">
-                          <StatusAvatar name={name} status={isPaid ? "safe" : "pending"} size="sm" />
-                          <span className="text-sm text-slate-700">{name}</span>
+                      <div
+                        key={user.email}
+                        style={{
+                          backgroundColor: isPaid ? "#EEEBE3" : "rgba(202,0,19,0.05)",
+                          border: `1px solid ${isPaid ? "rgba(0,0,0,0.08)" : "rgba(202,0,19,0.25)"}`,
+                          borderRadius: "14px",
+                        }}
+                        className="flex items-center justify-between p-2.5"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            style={{
+                              backgroundColor: isPaid ? "#000" : "#CA0013",
+                              color: "#EEEBE3",
+                              borderRadius: "10px",
+                              width: "32px",
+                              height: "32px",
+                              fontSize: "0.75rem",
+                              fontWeight: "700",
+                              boxShadow: isPaid
+                                ? "0 2px 8px rgba(0,0,0,0.18)"
+                                : "0 2px 8px rgba(202,0,19,0.3)",
+                            }}
+                            className="flex items-center justify-center flex-shrink-0"
+                          >
+                            {initial}
+                          </div>
+                          <span className="text-sm font-medium" style={{ color: "#000" }}>{name}</span>
                         </div>
                         {isPaid ? (
-                          <span className="text-xs text-emerald-600 font-semibold">Paid</span>
+                          <span
+                            className="text-xs font-bold px-2.5 py-1 rounded-full"
+                            style={{ backgroundColor: "rgba(0,0,0,0.07)", color: "#000" }}
+                          >
+                            Paid ✓
+                          </span>
                         ) : (
-                          <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
+                          <button
+                            style={{
+                              backgroundColor: "#CA0013",
+                              color: "#EEEBE3",
+                              border: "none",
+                              borderRadius: "99px",
+                              fontSize: "0.72rem",
+                              fontWeight: "700",
+                              padding: "5px 14px",
+                              letterSpacing: "0.03em",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              boxShadow: "0 2px 10px rgba(202,0,19,0.35)",
+                            }}
+                          >
                             <Bell className="w-3 h-3" />
                             Ping
-                          </Button>
+                          </button>
                         )}
                       </div>
                     );
                   })}
                 </div>
               </div>
-            </GlassCard>
+            </div>
           </Link>
 
+          {/* Bills Card */}
           <Link to="/app/bills">
-            <GlassCard hover className="border-[#c5c09a]/30">
-              <h3 className="font-semibold text-slate-800 mb-4">Bills</h3>
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "24px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06)",
+                border: "1px solid rgba(0,0,0,0.07)",
+                transition: "box-shadow 0.2s ease, transform 0.2s ease",
+              }}
+              className="mt-6 p-6 cursor-pointer hover:shadow-[0_16px_48px_rgba(0,0,0,0.13)] hover:-translate-y-0.5"
+            >
+              <h3 className="font-bold mb-4" style={{ color: "#000", letterSpacing: "-0.02em", fontSize: "1.05rem" }}>
+                Bills
+              </h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-slate-600">Total this month</span>
-                  <span className="font-semibold text-slate-800">$186</span>
+                  <span style={{ color: "#000", opacity: 0.45 }}>Total this month</span>
+                  <span className="font-bold" style={{ color: "#000" }}>$186</span>
                 </div>
-                <Progress value={100} className="h-3" />
-                <p className="text-xs text-slate-500 mt-2">All flatmates have paid</p>
+                <div style={{ backgroundColor: "#EEEBE3", borderRadius: "99px" }} className="h-2.5 overflow-hidden">
+                  <div
+                    style={{
+                      backgroundColor: "#000",
+                      width: "100%",
+                      borderRadius: "99px",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                    }}
+                    className="h-full"
+                  />
+                </div>
+                <p className="text-xs font-semibold" style={{ color: "#000", opacity: 0.45 }}>
+                  All flatmates have paid
+                </p>
               </div>
-            </GlassCard>
+            </div>
           </Link>
         </div>
 
+        {/* Groceries Card */}
         <div className="col-span-1">
           <Link to="/app/groceries">
-            <GlassCard hover className="border-[#f7c884]/30 h-full">
-              <h3 className="font-semibold text-slate-800 mb-4">Groceries</h3>
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "24px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06)",
+                border: "1px solid rgba(0,0,0,0.07)",
+                transition: "box-shadow 0.2s ease, transform 0.2s ease",
+              }}
+              className="p-6 h-full cursor-pointer hover:shadow-[0_16px_48px_rgba(0,0,0,0.13)] hover:-translate-y-0.5"
+            >
+              <h3 className="font-bold mb-4" style={{ color: "#000", letterSpacing: "-0.02em", fontSize: "1.05rem" }}>
+                Groceries
+              </h3>
               <div className="flex items-center justify-center py-4">
                 <div className="relative w-40 h-40">
-                  <svg className="w-full h-full -rotate-90">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">
+                    {/* Track */}
+                    <circle cx="80" cy="80" r="58" stroke="#EEEBE3" strokeWidth="16" fill="none" />
+                    {/* Fill */}
                     <circle
                       cx="80"
                       cy="80"
-                      r="60"
-                      stroke="#e5e7eb"
+                      r="58"
+                      stroke="#CA0013"
                       strokeWidth="16"
                       fill="none"
-                    />
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r="60"
-                      stroke="#f7c884"
-                      strokeWidth="16"
-                      fill="none"
-                      strokeDasharray={`${377 * 0.84} ${377 * 0.16}`}
+                      strokeDasharray={`${364 * 0.84} ${364 * 0.16}`}
                       strokeLinecap="round"
+                      style={{ filter: "drop-shadow(0 2px 6px rgba(202,0,19,0.4))" }}
                       className="transition-all duration-1000"
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-2xl font-bold text-slate-800">$168</div>
-                    <div className="text-xs text-slate-500">of $200</div>
+                    <div className="text-2xl font-bold" style={{ color: "#000", letterSpacing: "-0.04em" }}>
+                      $168
+                    </div>
+                    <div className="text-xs font-medium" style={{ color: "#000", opacity: 0.45 }}>
+                      of $200
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="text-center">
-                <p className="text-sm text-emerald-600 font-semibold">$32 remaining</p>
+              <div
+                style={{
+                  borderTop: "1px solid rgba(0,0,0,0.08)",
+                  paddingTop: "0.875rem",
+                  textAlign: "center",
+                }}
+              >
+                <p className="text-sm font-bold" style={{ color: "#CA0013" }}>
+                  $32 remaining
+                </p>
               </div>
-            </GlassCard>
+            </div>
           </Link>
         </div>
       </div>
