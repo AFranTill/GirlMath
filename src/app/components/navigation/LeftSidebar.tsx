@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Home, DollarSign, Zap, ShoppingCart, Trophy, User, LogOut } from "lucide-react";
+import { Home, DollarSign, Zap, ShoppingCart, Trophy, User, LogOut, Star } from "lucide-react";
 import { Button } from "../ui/button";
+import { GlassCard } from "../shared/GlassCard";
 import { supabase } from "../../../lib/supabaseClient";
 
 const navItems = [
@@ -15,6 +17,38 @@ const navItems = [
 export function LeftSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [stars, setStars] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadStars() {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !sessionData.session?.user?.id) {
+        setError("Not logged in");
+        setLoading(false);
+        return;
+      }
+
+      const userId = sessionData.session.user.id;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("star")
+        .eq("auth_user_id", userId)
+        .maybeSingle();
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setStars(data?.star ?? 0);
+      }
+      setLoading(false);
+    }
+
+    loadStars();
+  }, []);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -45,6 +79,11 @@ export function LeftSidebar() {
             >
               <Icon className="w-5 h-5" />
               <span>{label}</span>
+              {label === "Profile" && (
+                <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                  {loading ? "..." : error ? "!" : stars}
+                </span>
+              )}
             </Link>
           );
         })}
