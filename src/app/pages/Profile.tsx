@@ -50,6 +50,8 @@ export function Profile() {
     loadStars();
   }, []);
 
+  const level = stars !== null ? Math.floor(stars / 10) : 0;
+
   return (
     <div className="p-8 space-y-6 max-w-screen-xl mx-auto bg-[#EEEBE3] min-h-screen">
       <div className="flex flex-col items-center pt-8">
@@ -88,7 +90,9 @@ export function Profile() {
         <GlassCard className="bg-[#EEEBE3]">
           <div className="flex flex-col items-center text-center">
             <div className="text-sm text-black/50 mb-1">Level</div>
-            <div className="text-2xl font-bold text-black">10</div>
+              <div className="text-2xl font-bold text-slate-800">
+                {loading ? "..." : error ? "Error" : level}
+              </div>
           </div>
         </GlassCard>
 
