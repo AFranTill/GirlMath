@@ -1,14 +1,10 @@
+import { useEffect, useState } from "react";
 import { GlassCard } from "../components/shared/GlassCard";
 import { StatusAvatar } from "../components/shared/StatusAvatar";
 import { StarIcon } from "../components/shared/StarIcon";
 import { Progress } from "../components/ui/progress";
 import { Crown, TrendingUp, Zap, Award, Target, Shield } from "lucide-react";
-
-const rankings = [
-  { rank: 2, name: "Sam Taylor", stars: 42, level: "Silver" },
-  { rank: 1, name: "Alex Kim", stars: 58, level: "Gold" },
-  { rank: 3, name: "Jordan Lee", stars: 35, level: "Bronze" },
-];
+import { supabase } from "../../lib/supabaseClient";
 
 const badges = [
   { name: "The Early Bird", icon: TrendingUp, earned: true },
@@ -19,6 +15,46 @@ const badges = [
 ];
 
 export function Scoreboard() {
+  const [rankings, setRankings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadRankings() {
+      const { data, error } = await supabase
+        .from("users")
+        .select("email, star")
+        .order("star", { ascending: false });
+
+      console.log('Leaderboard data:', data, 'Error:', error);
+
+      if (error) {
+        setError(error.message);
+      } else {
+        // Sort by star descending, treating null as 0
+        const sortedData = data.sort((a, b) => (b.star ?? 0) - (a.star ?? 0));
+        const ranked = sortedData.map((user, index) => ({
+          rank: index + 1,
+          name: user.email.split('@')[0],
+          stars: user.star ?? 0,
+          level: user.star >= 50 ? "Gold" : user.star >= 30 ? "Silver" : "Bronze",
+        }));
+        setRankings(ranked);
+      }
+      setLoading(false);
+    }
+
+    loadRankings();
+  }, []);
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading leaderboard...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-600">Error: {error}</div>;
+  }
+
   return (
     <div className="p-8 space-y-6 max-w-screen-xl mx-auto">
       <h1 className="text-2xl font-bold text-slate-800 text-center pt-4">
@@ -26,7 +62,8 @@ export function Scoreboard() {
       </h1>
 
       <div className="relative flex items-end justify-center gap-4 pt-8">
-        {[rankings[0], rankings[1], rankings[2]].map((person) => {
+        {rankings.slice(0, 3).map((person) => {
+          const rank = person.rank as 1 | 2 | 3;
           const heights = { 1: "h-48", 2: "h-40", 3: "h-32" };
           const bgColors = {
             1: "from-amber-400 to-yellow-500",
@@ -45,7 +82,7 @@ export function Scoreboard() {
               )}
               <StatusAvatar name={person.name} status="safe" size="lg" />
               <div
-                className={`${heights[person.rank]} w-24 mt-2 bg-gradient-to-b ${bgColors[person.rank]} rounded-t-2xl flex flex-col items-center justify-start pt-4 shadow-lg`}
+                className={`${heights[rank]} w-24 mt-2 bg-gradient-to-b ${bgColors[rank]} rounded-t-2xl flex flex-col items-center justify-start pt-4 shadow-lg`}
               >
                 <div className="text-2xl font-bold text-white">{person.rank}</div>
                 <div className="flex items-center gap-1 mt-2">
@@ -61,6 +98,33 @@ export function Scoreboard() {
           );
         })}
       </div>
+
+      {/* Other users */}
+      {rankings.length > 3 && (
+        <div className="space-y-2">
+          {rankings.slice(3).map((person) => (
+            <div
+              key={person.rank}
+              className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center text-slate-700 font-bold text-sm">
+                  {person.rank}
+                </div>
+                <StatusAvatar name={person.name} status="safe" size="sm" />
+                <div>
+                  <p className="font-semibold text-slate-800">{person.name}</p>
+                  <p className="text-xs text-slate-500">{person.level}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <StarIcon size={14} />
+                <span className="font-semibold text-slate-700">{person.stars}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <GlassCard className="bg-[#f7c884]/20">
         <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
