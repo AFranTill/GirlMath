@@ -60,6 +60,48 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+    <table id="tx-table" border="1">
+        <thead>
+            <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Type</th>
+            </tr>
+        </thead>
+        <tbody id="tx-body"></tbody>
+    </table>
+
+    <button onclick="loadTransactions()">Load Transactions</button>
+
+
+    
+    <script>
+        async function loadTransactions() {
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch('http://localhost:3000/api/transactions', {
+        headers: { Authorization: `Bearer ${token}` }
+        });
+        const transactions = await res.json();
+
+        const tbody = document.getElementById('tx-body');
+        tbody.innerHTML = '';
+
+        transactions.forEach(tx => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(tx.date).toLocaleDateString('en-NZ')}</td>
+            <td>${tx.description}</td>
+            <td style="color: ${tx.amount < 0 ? 'red' : 'green'}">
+            $${tx.amount.toFixed(2)}
+            </td>
+            <td>${tx.type}</td>
+        `;
+        tbody.appendChild(row);
+        });
+    }
+    </script>
+
     <script>
         firebase.initializeApp({
             apiKey: "YOUR_API_KEY",
