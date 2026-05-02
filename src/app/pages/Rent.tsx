@@ -21,14 +21,25 @@ export function Rent() {
   const [flatmates, setFlatmates] = useState<Flatmate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const totalRent = 2400; // Configure as needed
+  const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchTransfers = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
+
+        // Fetch users first
+        const { data: usersData, error: usersError } = await supabase
+          .from("users")
+          .select("email")
+          .order("email");
+
+        if (usersError) {
+          console.error("Error loading users:", usersError);
+        } else {
+          setUsers(usersData || []);
+        }
 
         // Get auth session from Supabase
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -67,14 +78,14 @@ export function Rent() {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
         setError(message);
-        console.error('Error fetching transfers:', err);
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
       
     };
 
-    fetchTransfers();
+    fetchData();
   }, []);
 
   const handleNudge = (name: string) => {
@@ -83,9 +94,10 @@ export function Rent() {
   };
 
   // Calculate totals from dynamic data
+  const totalRent = users.length * 250;
   const paidCount = flatmates.filter(f => f.paid).length;
   const totalPaid = flatmates.filter(f => f.paid).reduce((sum, f) => sum + f.amount, 0);
-  const progressPercent = flatmates.length > 0 ? (paidCount / flatmates.length) * 100 : 0;
+  const progressPercent = totalRent > 0 ? (totalPaid / totalRent) * 100 : 0;
 
   return (
     <div className="p-6 space-y-6 max-w-screen-lg mx-auto">
@@ -124,7 +136,7 @@ export function Rent() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Progress</span>
-                <span className="font-semibold">{paidCount} / {flatmates.length} paid</span>
+                <span className="font-semibold"> 1 / {users.length} paid</span>
               </div>
               <Progress value={progressPercent} className="h-3" />
             </div>
@@ -136,7 +148,7 @@ export function Rent() {
             </GlassCard>
           ) : (
             <div className="space-y-3">
-              <h2 className="font-semibold text-slate-800">Flatmate Status</h2>
+              <h2 className="font-semibold text-slate-800">Transaction History</h2>
               {flatmates.map((flatmate) => (
                 <GlassCard key={flatmate.id}>
                   <div className="flex items-center justify-between">
@@ -163,7 +175,7 @@ export function Rent() {
                       ) : (
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button
+                            {/* <Button
                               variant="outline"
                               size="sm"
                               className="gap-2"
@@ -171,7 +183,7 @@ export function Rent() {
                             >
                               <Bell className="w-4 h-4" />
                               Send Nudge
-                            </Button>
+                            </Button> */}
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
