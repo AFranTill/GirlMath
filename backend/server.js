@@ -1,12 +1,13 @@
 const express = require('express');
-const admin = require('firebase-admin');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-const serviceAccount = require('./serviceAccountKey.json'); // the JSON you downloaded
-
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY  // service_role key, not anon key
+);
 
 const app = express();
 app.use(cors());
@@ -32,7 +33,7 @@ app.get('/api/accounts', async (req, res) => { //requireAuth
 });
 
 // GET /api/transactions — get last 30 days of transactions
-app.get('/api/transactions', async (req, res) => { //, requireAuth, 
+app.get('/api/transactions', requireAuth, async (req, res) => { 
   try {
     const transactions = [];
     const query = {};
@@ -54,8 +55,11 @@ app.get('/api/transactions', async (req, res) => { //, requireAuth,
 async function requireAuth(req, res, next) {
   const token = req.headers.authorization?.split('Bearer ')[1];
   if (!token) return res.status(401).json({ error: 'No token' });
+  
   try {
-    req.user = await admin.auth().verifyIdToken(token);
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: 'Invalid token' });
+    req.user = user;
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });

@@ -29,6 +29,7 @@
         <input type="password" id="password" placeholder="Password">
         <button onclick="logIn()">Log In</button>
         <button onclick="signUp()">Sign Up</button>
+        <div id="output" style="margin-top: 10px; color: red;"></div>
     </div>
 
     <div class="tracker">
@@ -53,6 +54,21 @@
                 <input type="text" id="new-category" placeholder="Category Name">
                 <button onclick="addCategory()">Add Category</button>
             </div>
+
+            <h3>Transactions</h3>
+            <table id="tx-table" border="1">
+                <thead>
+                    <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody id="tx-body"></tbody>
+            </table>
+
+            <button onclick="loadTransactions()">Load Transactions</button>
         </div>
     </div>
 
@@ -60,94 +76,114 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-    <table id="tx-table" border="1">
-        <thead>
-            <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Type</th>
-            </tr>
-        </thead>
-        <tbody id="tx-body"></tbody>
-    </table>
-
-    <button onclick="loadTransactions()">Load Transactions</button>
-
 
     
     <script>
-        async function loadTransactions() {
-        const token = await auth.currentUser.getIdToken();
-        const res = await fetch('http://localhost:3000/api/transactions', {
-        headers: { Authorization: `Bearer ${token}` }
-        });
-        const transactions = await res.json();
+    async function loadTransactions() {
+        try {
+            const { data: { session }, error: sessionError } = await sb.auth.getSession();
+            if (sessionError || !session) {
+                throw new Error('Not logged in to Supabase.');
+            }
 
-        const tbody = document.getElementById('tx-body');
-        tbody.innerHTML = '';
+            const res = await fetch('http://localhost:3000/api/transactions', {
+                headers: { Authorization: `Bearer ${session.access_token}` }
+            });
 
-        transactions.forEach(tx => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${new Date(tx.date).toLocaleDateString('en-NZ')}</td>
-            <td>${tx.description}</td>
-            <td style="color: ${tx.amount < 0 ? 'red' : 'green'}">
-            $${tx.amount.toFixed(2)}
-            </td>
-            <td>${tx.type}</td>
-        `;
-        tbody.appendChild(row);
-        });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || `HTTP ${res.status}`);
+            }
+
+            const transactions = await res.json();
+            console.log('Transactions loaded:', transactions);
+
+            const tbody = document.getElementById('tx-body');
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(transactions)) {
+                throw new Error('Invalid response format');
+            }
+
+            transactions.forEach(tx => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(tx.date).toLocaleDateString('en-NZ')}</td>
+                    <td>${tx.description}</td>
+                    <td style="color: ${tx.amount < 0 ? 'red' : 'green'}">
+                    $${tx.amount.toFixed(2)}
+                    </td>
+                    <td>${tx.type}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading transactions:', error);
+            alert('Failed to load transactions: ' + error.message);
+        }
     }
     </script>
 
-    <script>
-        firebase.initializeApp({
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            // ... rest of your config object
-        });
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
 
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+    <script>
+        // firebase.initializeApp({
+        //     apiKey: "AIzaSyAHJAtQBsu8Q3caeL-OosrFAoxzOyiG4VQ",
+        //     authDomain: "girlmath-5ceba.firebaseapp.com",
+        //     projectId: "girlmath-5ceba",
+        //     storageBucket: "girlmath-5ceba.firebasestorage.app",
+        //     messagingSenderId: "664776394529",
+        //     appId: "1:664776394529:web:7c8c742a693be94d70e060",
+        //     measurementId: "G-WRXCKW88RK"
+        // });
+
+        // const auth = firebase.auth();
+        // const db = firebase.firestore();
 
         let categories = ['rent', 'bills', 'grocery'];
         let userRole = null;
 
-        // Sign up
+        const { createClient } = supabase;
+        const sb = createClient(
+            'https://fklqqjwvfjjasthdayln.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrbHFxand2ZmpqYXN0aGRheWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Nzc2NzcsImV4cCI6MjA5MzI1MzY3N30.sFMfPIf3BxoUjHc8BUflI3D0qGYBgH1npNO2Az-aiqo'
+        );
+        const outputEl = document.getElementById('output');
+
         async function signUp() {
+            outputEl.textContent = '';
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            try {
-                await auth.createUserWithEmailAndPassword(email, password);
-                alert('Signed up successfully!');
-            } catch (error) {
-                alert(error.message);
-            }
+            const { error } = await sb.auth.signUp({ email, password });
+            if (error) outputEl.textContent = 'Error: ' + error.message;
+            else outputEl.textContent = 'Signed up! Check your email to confirm.';
         }
 
-        // Log in
         async function logIn() {
+            outputEl.textContent = '';
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-            } catch (error) {
-                alert(error.message);
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) {
+                outputEl.textContent = 'Error: ' + error.message;
+            } else {
+                outputEl.textContent = 'Logged in as: ' + data.user.email;
             }
         }
 
-        // Log out
-        function logOut() {
-            auth.signOut();
-            localStorage.removeItem('userRole');
-            userRole = null;
+        async function callAPI() {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) { outputEl.textContent = 'Not logged in!'; return; }
+
+            const res = await fetch('http://localhost:3000/api/me', {
+                headers: { Authorization: `Bearer ${session.access_token}` }
+            });
+            const data = await res.json();
+            outputEl.textContent = JSON.stringify(data, null, 2);
         }
 
-        // Watch auth state
-        auth.onAuthStateChanged(user => {
+        sb.auth.onAuthStateChange((event, session) => {
+            const user = session?.user || null;
             if (user) {
                 document.body.classList.add('logged-in');
                 document.getElementById('userEmail').textContent = user.email;
@@ -178,8 +214,10 @@
             if (userRole === 'head') {
                 document.getElementById('add-category').style.display = 'block';
             }
-            loadCategories();
-            loadExpenses();
+            if (typeof db !== 'undefined') {
+                loadCategories();
+                loadExpenses();
+            }
         }
 
         async function loadCategories() {
@@ -236,8 +274,13 @@
         async function addExpense(category) {
             const amount = document.getElementById(`${category}-amount`).value;
             const desc = document.getElementById(`${category}-desc`).value;
-            const user = auth.currentUser;
-            if (!user) return;
+            const user = window.auth?.currentUser;
+            if (!user || typeof db === 'undefined') {
+                if (typeof outputEl !== 'undefined') {
+                    outputEl.textContent = 'Expense storage is not configured for Supabase auth yet.';
+                }
+                return;
+            }
 
             await db.collection('expenses').add({
                 category,
@@ -254,7 +297,10 @@
         }
 
         async function loadExpenses() {
-            const user = auth.currentUser;
+            if (typeof db === 'undefined') {
+                return;
+            }
+            const user = window.auth?.currentUser;
             if (!user) return;
 
             const snapshot = await db.collection('expenses').where('userId', '==', user.uid).get();
@@ -281,6 +327,7 @@
         }
 
         async function deleteExpense(id) {
+            if (typeof db === 'undefined') return;
             await db.collection('expenses').doc(id).delete();
             loadExpenses();
         }
