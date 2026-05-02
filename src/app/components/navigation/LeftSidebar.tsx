@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router";
 import { Home, DollarSign, Zap, ShoppingCart, Trophy, User, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
+import { supabase } from "../../../lib/supabaseClient";
 
 const navItems = [
   { path: "/app", icon: Home, label: "Home" },
@@ -15,8 +16,12 @@ export function LeftSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    navigate("/");
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout failed", error);
+    }
+    navigate("/login");
   };
 
   return (

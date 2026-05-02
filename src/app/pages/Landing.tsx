@@ -8,12 +8,12 @@ export function Landing() {
       <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="text-2xl font-bold text-slate-800">FlatTrack</div>
         <div className="flex items-center gap-4">
-          <Link to="/app">
+          <Link to="/login">
             <Button variant="ghost" className="text-slate-700">
               Log in
             </Button>
           </Link>
-          <Link to="/app">
+          <Link to="/login">
             <Button variant="outline" className="border-slate-300 text-slate-700">
               Sign up
             </Button>
@@ -32,7 +32,7 @@ export function Landing() {
               works.
             </p>
             <div className="flex gap-4">
-              <Link to="/app">
+              <Link to="/login">
                 <Button
                   size="lg"
                   className="bg-[#e19696] hover:bg-[#d18585] text-white px-8"

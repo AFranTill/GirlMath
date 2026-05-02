@@ -2,6 +2,7 @@ import { GlassCard } from "../components/shared/GlassCard";
 import { StatusAvatar } from "../components/shared/StatusAvatar";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
+import { Progress } from "../components/ui/progress";
 import { CheckCircle2, Bell } from "lucide-react";
 import { useState } from "react";
 
