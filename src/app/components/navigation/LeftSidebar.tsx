@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Home, DollarSign, Zap, ShoppingCart, Trophy, User, LogOut } from "lucide-react";
+import { Home, DollarSign, Zap, ShoppingCart, Trophy, User, LogOut, Star } from "lucide-react";
 import { Button } from "../ui/button";
+import { GlassCard } from "../shared/GlassCard";
 import { supabase } from "../../../lib/supabaseClient";
 import { useEffect, useState } from "react";
 
