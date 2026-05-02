@@ -15,12 +15,13 @@ import "dotenv/config";
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { AkahuClient } from "akahu";
 
 // ------------------------------------------------------------
 //  Supabase client
 // ------------------------------------------------------------
-const SUPABASE_URL = "https://fklqqjwvfjjasthdayln.supabase.co"//process.env.SUPABASE_URL;
-const SUPABASE_KEY = "sb_publishable_kIugdb86aF-_-FZnuu0vgA_uvMyz8y8"//process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://fklqqjwvfjjasthdayln.supabase.co";
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "sb_publishable_kIugdb86aF-_-FZnuu0vgA_uvMyz8y8";
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error("❌  Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars.");
@@ -28,6 +29,65 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ------------------------------------------------------------
+//  Akahu client
+// ------------------------------------------------------------
+const akahu = new AkahuClient({
+  appToken: process.env.AKAHU_APP_TOKEN,
+});
+
+const AKAHU_USER_TOKEN = process.env.AKAHU_USER_TOKEN;
+
+if (!process.env.AKAHU_APP_TOKEN) {
+  console.warn("⚠️   AKAHU_APP_TOKEN not set in .env");
+}
+
+if (!AKAHU_USER_TOKEN) {
+  console.warn("⚠️   AKAHU_USER_TOKEN not set in .env");
+}
+
+// ------------------------------------------------------------
+//  Fetch transactions from Akahu API
+// ------------------------------------------------------------
+async function fetchAkahuTransactions() {
+  if (!AKAHU_USER_TOKEN || !process.env.AKAHU_APP_TOKEN) {
+    console.error("❌  Missing AKAHU credentials:");
+    console.error("    AKAHU_APP_TOKEN:", process.env.AKAHU_APP_TOKEN ? "✓ set" : "❌ missing");
+    console.error("    AKAHU_USER_TOKEN:", AKAHU_USER_TOKEN ? "✓ set" : "❌ missing");
+    console.error("\n   Add these to your .env file in the backend/ folder");
+    process.exit(1);
+  }
+
+  console.log("📡  Fetching transactions from Akahu API...");
+  console.log("    Using AKAHU_APP_TOKEN:", process.env.AKAHU_APP_TOKEN?.substring(0, 10) + "...");
+  console.log("    Using AKAHU_USER_TOKEN:", AKAHU_USER_TOKEN?.substring(0, 10) + "...\n");
+  
+  const transactions = [];
+  let cursor = null;
+
+  try {
+    let count = 0;
+    do {
+      const options = cursor ? { cursor } : {};
+      const page = await akahu.transactions.list(AKAHU_USER_TOKEN, options);
+      transactions.push(...page.items);
+      cursor = page.cursor?.next || null;
+      count += page.items.length;
+      if (count >= 10) break; // Limit to 10 for testing
+    } while (cursor !== null);
+
+    return transactions;
+  } catch (err) {
+    console.error(`❌  Akahu API error: ${err.message}`);
+    console.error("\n   This usually means:");
+    console.error("   - Invalid AKAHU_USER_TOKEN or AKAHU_APP_TOKEN");
+    console.error("   - The Akahu API is unreachable");
+    console.error("   - Your credentials have expired");
+    console.error("\n   Response details:", err.response?.status || "No response");
+    process.exit(1);
+  }
+}
 
 // ------------------------------------------------------------
 //  Parse the counterparty name and reference code from a
@@ -134,20 +194,29 @@ async function mapTransaction(item) {
 // ------------------------------------------------------------
 //  Main import function
 // ------------------------------------------------------------
-async function importTransactions(jsonFilePath) {
-  const absolutePath = resolve(jsonFilePath);
-  console.log(`📂  Reading: ${absolutePath}\n`);
+async function importTransactions(source) {
+  let items;
 
-  let parsed;
-  try {
-    parsed = JSON.parse(readFileSync(absolutePath, "utf-8"));
-  } catch (err) {
-    console.error(`❌  Could not read/parse JSON file: ${err.message}`);
-    process.exit(1);
+  // Determine source: 'akahu' or file path
+  if (source === 'akahu' || source === '--akahu') {
+    items = await fetchAkahuTransactions();
+  } else {
+    // Treat as file path
+    const absolutePath = resolve(source);
+    console.log(`📂  Reading: ${absolutePath}\n`);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(readFileSync(absolutePath, "utf-8"));
+    } catch (err) {
+      console.error(`❌  Could not read/parse JSON file: ${err.message}`);
+      process.exit(1);
+    }
+
+    // Akahu wraps items in { success, items: [...] }
+    items = parsed.items ?? parsed;
   }
 
-  // Akahu wraps items in { success, items: [...] }
-  const items = parsed.items ?? parsed;
   if (!Array.isArray(items) || items.length === 0) {
     console.error('❌  Expected a JSON object with an "items" array, or a raw array.');
     process.exit(1);
@@ -194,6 +263,9 @@ const { data, error } = await supabase
 
   if (error) {
     console.error("❌  Supabase error:", error.message);
+    console.error("Error details:", error);
+    console.error("First 5 imported rows:", JSON.stringify(rows.slice(0, 5), null, 2));
+    console.error("First 5 Akahu items:", JSON.stringify(items.slice(0, 5), null, 2));
     process.exit(1);
   }
 
@@ -229,12 +301,53 @@ const { data, error } = await supabase
 }
 
 // ------------------------------------------------------------
+//  Test mode: just fetch Akahu and log
+// ------------------------------------------------------------
+async function testAkahuFetch() {
+  console.log("🧪  Testing Akahu fetch...\n");
+  const transactions = await fetchAkahuTransactions();
+  console.log(`✅  Fetched ${transactions.length} transactions\n`);
+  console.log("📋  First 5 transactions:");
+  console.log(JSON.stringify(transactions.slice(0, 5), null, 2));
+}
+
+// ------------------------------------------------------------
+//  Test mode: just fetch from Supabase and log
+// ------------------------------------------------------------
+async function testSupabaseFetch() {
+  console.log("🧪  Testing Supabase fetch...\n");
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .limit(5);
+
+  if (error) {
+    console.error("❌  Supabase error:", error.message);
+    process.exit(1);
+  }
+
+  console.log(`✅  Fetched ${data.length} transactions from Supabase\n`);
+  console.log("📋  First 5 transactions:");
+  console.log(JSON.stringify(data, null, 2));
+}
+
+// ------------------------------------------------------------
 //  Entry point
 // ------------------------------------------------------------
-const filePath = process.argv[2];
-if (!filePath) {
-  console.error("Usage: node import.js <path-to-akahu-export.json>");
+const source = process.argv[2];
+if (!source) {
+  console.error("Usage:");
+  console.error("  node import.js akahu              # Fetch and import from Akahu API");
+  console.error("  node import.js akahu-test         # Test Akahu fetch only (no import)");
+  console.error("  node import.js supabase-test      # Test Supabase fetch only");
+  console.error("  node import.js <file-path>        # Import from JSON file");
   process.exit(1);
 }
 
-importTransactions(filePath);
+if (source === 'akahu-test') {
+  testAkahuFetch();
+} else if (source === 'supabase-test') {
+  testSupabaseFetch();
+} else {
+  importTransactions(source);
+}
