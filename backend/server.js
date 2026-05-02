@@ -61,6 +61,7 @@ app.get('/api/payments/transfers', requireAuth, async (req, res) => {
       .from('transactions')
       .select('id, transaction_date, amount, direction, description, counterparty, transaction_type, user_id')
       .eq('transaction_type', 'TRANSFER')
+      .eq('direction', 'credit')
       .order('transaction_date', { ascending: false });
 
     if (error) {

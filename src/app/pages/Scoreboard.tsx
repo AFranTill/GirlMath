@@ -143,33 +143,6 @@ export function Scoreboard() {
         </div>
       )}
 
-      {/* Other users */}
-      {rankings.length > 3 && (
-        <div className="space-y-2">
-          {rankings.slice(3).map((person) => (
-            <div
-              key={person.rank}
-              className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center text-slate-700 font-bold text-sm">
-                  {person.rank}
-                </div>
-                <StatusAvatar name={person.name} status="safe" size="sm" />
-                <div>
-                  <p className="font-semibold text-slate-800">{person.name}</p>
-                  <p className="text-xs text-slate-500">{person.level}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <StarIcon size={14} />
-                <span className="font-semibold text-slate-700">{person.stars}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Star Rulebook */}
       <div
         className="rounded-2xl p-5 shadow-md"
@@ -181,11 +154,11 @@ export function Scoreboard() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span style={{ color: "#4a4a4a" }}>Pay rent on time</span>
-            <span className="font-semibold" style={{ color: "#eec4a2" }}>+1 ⭐</span>
+            <span className="font-semibold" style={{ color: "#0a0a0a" }}>+1 ⭐</span>
           </div>
           <div className="flex justify-between">
             <span style={{ color: "#4a4a4a" }}>Pay bills on time</span>
-            <span className="font-semibold" style={{ color: "#f3e4c0" }}>+1 ⭐</span>
+            <span className="font-semibold" style={{ color: "#0a0a0a" }}>+1 ⭐</span>
           </div>
           <div className="flex justify-between">
             <span style={{ color: "#4a4a4a" }}>Don't pay rent on time</span>

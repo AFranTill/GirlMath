@@ -1,19 +1,15 @@
-import { useState } from "react";
-import { CheckCircle2, Bell } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle2, Bell, AlertCircle, Loader } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
+import { Progress } from "../components/ui/progress";
+import { supabase } from "../../lib/supabaseClient";
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 // #EEEBE3  — off-white / background
 // #CA0013  — red accent
 // #000000  — black / text / primary
 // ────────────────────────────────────────────────────────────────────────────
-
-const flatmates = [
-  { name: "Amy", paid: true, amount: 650, paidDate: "Apr 28" },
-  { name: "Sam Taylor", paid: true, amount: 650, paidDate: "Apr 30" },
-  { name: "Jordan Lee", paid: false, amount: 650, paidDate: null },
-];
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
@@ -33,17 +29,6 @@ function GlassCard({
   );
 }
 
-function Progress({ value }: { value: number }) {
-  return (
-    <div className="h-3 w-full rounded-full bg-black/10 overflow-hidden">
-      <div
-        className="h-full rounded-full bg-black transition-all duration-500"
-        style={{ width: `${value}%` }}
-      />
-    </div>
-  );
-}
-
 function StatusAvatar({ name, status }: { name: string; status: "safe" | "pending" }) {
   const initials = name
     .split(" ")
@@ -54,21 +39,18 @@ function StatusAvatar({ name, status }: { name: string; status: "safe" | "pendin
 
   return (
     <div
-      className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${status === "safe"
-        ? "bg-black text-[#EEEBE3]"
-        : "bg-[#CA0013] text-[#EEEBE3]"
-        }`}
+      className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${
+        status === "safe"
+          ? "bg-black text-[#EEEBE3]"
+          : "bg-[#CA0013] text-[#EEEBE3]"
+      }`}
     >
       {initials}
     </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-import { Progress } from "../components/ui/progress";
-import { CheckCircle2, Bell, AlertCircle, Loader } from "lucide-react";
-import { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabaseClient";
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Flatmate {
   id: string;
@@ -78,7 +60,10 @@ interface Flatmate {
   paidDate: string | null;
 }
 
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export function Rent() {
+  const [nudgeOpen, setNudgeOpen] = useState(false);
   const [nudgedPerson, setNudgedPerson] = useState("");
   const [flatmates, setFlatmates] = useState<Flatmate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +76,7 @@ export function Rent() {
         setLoading(true);
         setError(null);
 
-        // Fetch users first
+        // Fetch users
         const { data: usersData, error: usersError } = await supabase
           .from("users")
           .select("email")
@@ -103,48 +88,35 @@ export function Rent() {
           setUsers(usersData || []);
         }
 
-        // Get auth session from Supabase
+        // Get auth session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !session) {
-          setError('Not authenticated. Please log in.');
+          setError("Not authenticated. Please log in.");
           setLoading(false);
           return;
         }
 
         const token = session.access_token;
-        
 
-        const response = await fetch('/api/payments/transfers', {
-          headers: { 'Authorization': `Bearer ${token}` },
+        const response = await fetch("/api/payments/transfers", {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        // DEBUG - remove once fixed
         const text = await response.text();
-        console.log('Status:', response.status);
-        console.log('URL hit:', `${"http://localhost:5173"}/api/payments/transfers`);
-        console.log('Token:', token?.substring(0, 20) + '...');
-        console.log('Raw response:', text);
 
         if (!response.ok) {
           throw new Error(`Failed to fetch transfers: ${response.statusText}`);
         }
 
         const data = JSON.parse(text);
-        
-        // const text = await response.text();
-        // console.log('Raw response:', text); // See what's actually coming back
-        // // const otherdata = JSON.parse(text);
-        
-
         setFlatmates(data);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unknown error';
+        const message = err instanceof Error ? err.message : "Unknown error";
         setError(message);
-        console.error('Error fetching data:', err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
-      
     };
 
     fetchData();
@@ -155,10 +127,9 @@ export function Rent() {
     setNudgeOpen(true);
   };
 
-  // Calculate totals from dynamic data
   const totalRent = users.length * 250;
-  const paidCount = flatmates.filter(f => f.paid).length;
-  const totalPaid = flatmates.filter(f => f.paid).reduce((sum, f) => sum + f.amount, 0);
+  const paidCount = flatmates.filter((f) => f.paid).length;
+  const totalPaid = flatmates.filter((f) => f.paid).reduce((sum, f) => sum + f.amount, 0);
   const progressPercent = totalRent > 0 ? (totalPaid / totalRent) * 100 : 0;
 
   return (
@@ -169,6 +140,7 @@ export function Rent() {
         <p className="text-sm text-black/50 mt-1">Due: May 5, 2026 (3 days remaining)</p>
       </div>
 
+      {/* Error */}
       {error && (
         <GlassCard className="bg-red-50/80 border border-red-200">
           <div className="flex items-center gap-2">
@@ -178,6 +150,7 @@ export function Rent() {
         </GlassCard>
       )}
 
+      {/* Loading */}
       {loading ? (
         <GlassCard className="flex items-center justify-center py-12">
           <Loader className="w-6 h-6 text-slate-400 animate-spin" />
@@ -185,6 +158,7 @@ export function Rent() {
         </GlassCard>
       ) : (
         <>
+          {/* Summary card */}
           <GlassCard className="bg-gradient-to-br from-[#e19696]/10 to-[#f7c884]/10">
             <div className="flex justify-between items-center mb-4">
               <div>
@@ -193,26 +167,23 @@ export function Rent() {
               </div>
               <div className="text-right">
                 <p className="text-sm text-slate-600">Collected</p>
-                <p className="text-2xl font-bold text-emerald-600">${totalPaid} / ${totalRent}</p>
+                <p className="text-2xl font-bold text-emerald-600">
+                  ${totalPaid} / ${totalRent}
+                </p>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Progress</span>
-                <span className="font-semibold"> 1 / {users.length} paid</span>
-              
-                    {/* Progress bar on red card uses white track / off-white fill */}
-                <div className="h-3 w-full rounded-full bg-[#EEEBE3]/25 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#EEEBE3] transition-all duration-500"
-                    style={{ width: "66.67%" }}
-                  />
-                </div>
+                <span className="font-semibold">
+                  {paidCount} / {users.length} paid
+                </span>
               </div>
               <Progress value={progressPercent} className="h-3" />
             </div>
           </GlassCard>
 
+          {/* Flatmate list */}
           {flatmates.length === 0 ? (
             <GlassCard className="text-center py-8">
               <p className="text-slate-600">No transfer payments recorded yet</p>
@@ -227,7 +198,6 @@ export function Rent() {
                       <StatusAvatar
                         name={flatmate.name}
                         status={flatmate.paid ? "safe" : "pending"}
-                        size="md"
                       />
                       <div>
                         <p className="font-semibold text-slate-800">{flatmate.name}</p>
@@ -244,9 +214,9 @@ export function Rent() {
                           </div>
                         </div>
                       ) : (
-                        <Dialog>
+                        <Dialog open={nudgeOpen && nudgedPerson === flatmate.name} onOpenChange={setNudgeOpen}>
                           <DialogTrigger asChild>
-                            {/* <Button
+                            <Button
                               variant="outline"
                               size="sm"
                               className="gap-2"
@@ -254,7 +224,7 @@ export function Rent() {
                             >
                               <Bell className="w-4 h-4" />
                               Send Nudge
-                            </Button> */}
+                            </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
@@ -267,11 +237,9 @@ export function Rent() {
                               <p className="text-sm text-slate-600">
                                 Send {flatmate.name} a gentle reminder about the upcoming rent payment?
                               </p>
-                              <div className="flex gap-2">
-                                <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
-                                  Send Nudge
-                                </Button>
-                              </div>
+                              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                                Send Nudge
+                              </Button>
                             </div>
                           </DialogContent>
                         </Dialog>
@@ -283,13 +251,15 @@ export function Rent() {
             </div>
           )}
 
-      {/* Star opportunity banner */}
-      <GlassCard className="bg-black">
-        <h3 className="font-semibold text-[#EEEBE3] mb-2">Star Opportunity</h3>
-        <p className="text-sm text-[#EEEBE3]/60">
-          If everyone pays by May 5th, the whole flat earns +1 Bonus Star!
-        </p>
-      </GlassCard>
+          {/* Star opportunity banner */}
+          <GlassCard className="bg-black">
+            <h3 className="font-semibold text-[#EEEBE3] mb-2">Star Opportunity</h3>
+            <p className="text-sm text-[#EEEBE3]/60">
+              If everyone pays by May 5th, the whole flat earns +1 Bonus Star!
+            </p>
+          </GlassCard>
+        </>
+      )}
     </div>
   );
 }

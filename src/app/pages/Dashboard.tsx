@@ -14,20 +14,25 @@ export function Dashboard() {
     async function loadUsers() {
       const { data, error } = await supabase
         .from("users")
-        .select("email")
-        .order("email");
+        .select("email, first_name");
 
       if (error) {
         console.error("Error loading users:", error);
       } else {
-        setUsers(data || []);
+        // Sort users alphabetically by display name (first_name or email prefix)
+        const sortedUsers = (data || []).sort((a, b) => {
+          const nameA = a.first_name || a.email.split('@')[0];
+          const nameB = b.first_name || b.email.split('@')[0];
+          return nameA.localeCompare(nameB);
+        });
+        setUsers(sortedUsers);
       }
     }
 
     loadUsers();
   }, []);
 
-  const paidCount = Math.min(2, users.length);
+  const paidCount = Math.min(1, users.length);
   const totalUsers = users.length;
   const totalAmount = totalUsers * 250;
   const paidAmount = paidCount * 250;
@@ -51,7 +56,9 @@ export function Dashboard() {
             Rent due in 5 days
           </p>
           <p className="text-sm" style={{ color: "#000", opacity: 0.55 }}>
-            {totalUsers > paidCount ? `${users[paidCount]?.email.split('@')[0] || 'Someone'} still needs to pay their share ($250)` : 'All rent payments are up to date'}
+            {totalUsers > paidCount
+              ? `${users[paidCount]?.email.split("@")[0] || "Someone"} still needs to pay their share ($250)`
+              : "All rent payments are up to date"}
           </p>
         </div>
       </div>
@@ -82,78 +89,81 @@ export function Dashboard() {
                   <div
                     style={{
                       backgroundColor: "#CA0013",
-                      width: "66.67%",
+                      width: `${progressValue}%`,
                       borderRadius: "99px",
                       boxShadow: "0 2px 8px rgba(202,0,19,0.35)",
                     }}
                     className="h-full"
                   />
                 </div>
-                <Progress value={progressValue} className="h-3" />
 
                 <div className="space-y-2 mt-4">
-                  {[
-                    { name: "Jordan", initial: "J", paid: true },
-                    { name: "Morgan", initial: "M", paid: true },
-                    { name: "Alex", initial: "A", paid: false },
-                  ].map(({ name, initial, paid }) => (
-                    <div
-                      key={name}
-                      style={{
-                        backgroundColor: paid ? "#EEEBE3" : "rgba(202,0,19,0.05)",
-                        border: `1px solid ${paid ? "rgba(0,0,0,0.08)" : "rgba(202,0,19,0.25)"}`,
-                        borderRadius: "14px",
-                      }}
-                      className="flex items-center justify-between p-2.5"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          style={{
-                            backgroundColor: paid ? "#000" : "#CA0013",
-                            color: "#EEEBE3",
-                            borderRadius: "10px",
-                            width: "32px",
-                            height: "32px",
-                            fontSize: "0.75rem",
-                            fontWeight: "700",
-                            boxShadow: paid
-                              ? "0 2px 8px rgba(0,0,0,0.18)"
-                              : "0 2px 8px rgba(202,0,19,0.3)",
-                          }}
-                          className="flex items-center justify-center flex-shrink-0"
-                        >
-                          {initial}
+                  {users.map((user, index) => {
+                    const name = user.first_name || user.email.split("@")[0];
+                    const isPaid = index < paidCount;
+                    const initial = name.charAt(0).toUpperCase();
+
+                    return (
+                      <div
+                        key={user.email}
+                        style={{
+                          backgroundColor: isPaid ? "#EEEBE3" : "rgba(202,0,19,0.05)",
+                          border: `1px solid ${isPaid ? "rgba(0,0,0,0.08)" : "rgba(202,0,19,0.25)"}`,
+                          borderRadius: "14px",
+                        }}
+                        className="flex items-center justify-between p-2.5"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            style={{
+                              backgroundColor: isPaid ? "#000" : "#CA0013",
+                              color: "#EEEBE3",
+                              borderRadius: "10px",
+                              width: "32px",
+                              height: "32px",
+                              fontSize: "0.75rem",
+                              fontWeight: "700",
+                              boxShadow: isPaid
+                                ? "0 2px 8px rgba(0,0,0,0.18)"
+                                : "0 2px 8px rgba(202,0,19,0.3)",
+                            }}
+                            className="flex items-center justify-center flex-shrink-0"
+                          >
+                            {initial}
+                          </div>
+                          <span className="text-sm font-medium" style={{ color: "#000" }}>{name}</span>
                         </div>
-                        <span className="text-sm font-medium" style={{ color: "#000" }}>{name}</span>
+                        {isPaid ? (
+                          <span
+                            className="text-xs font-bold px-2.5 py-1 rounded-full"
+                            style={{ backgroundColor: "rgba(0,0,0,0.07)", color: "#000" }}
+                          >
+                            Paid ✓
+                          </span>
+                        ) : (
+                          <button
+                            style={{
+                              backgroundColor: "#CA0013",
+                              color: "#EEEBE3",
+                              border: "none",
+                              borderRadius: "99px",
+                              fontSize: "0.72rem",
+                              fontWeight: "700",
+                              padding: "5px 14px",
+                              letterSpacing: "0.03em",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              boxShadow: "0 2px 10px rgba(202,0,19,0.35)",
+                            }}
+                          >
+                            <Bell className="w-3 h-3" />
+                            Ping
+                          </button>
+                        )}
                       </div>
-                      {paid ? (
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full"
-                          style={{ backgroundColor: "rgba(0,0,0,0.07)", color: "#000" }}>
-                          Paid ✓
-                        </span>
-                      ) : (
-                        <button
-                          style={{
-                            backgroundColor: "#CA0013",
-                            color: "#EEEBE3",
-                            border: "none",
-                            borderRadius: "99px",
-                            fontSize: "0.72rem",
-                            fontWeight: "700",
-                            padding: "5px 14px",
-                            letterSpacing: "0.03em",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "5px",
-                            boxShadow: "0 2px 10px rgba(202,0,19,0.35)",
-                          }}
-                        >
-                          <Bell className="w-3 h-3" />
-                          Ping
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -234,10 +244,7 @@ export function Dashboard() {
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div
-                      className="text-2xl font-bold"
-                      style={{ color: "#000", letterSpacing: "-0.04em" }}
-                    >
+                    <div className="text-2xl font-bold" style={{ color: "#000", letterSpacing: "-0.04em" }}>
                       $168
                     </div>
                     <div className="text-xs font-medium" style={{ color: "#000", opacity: 0.45 }}>
@@ -260,7 +267,7 @@ export function Dashboard() {
             </div>
           </Link>
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }
