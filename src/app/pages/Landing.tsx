@@ -4,38 +4,85 @@ import { CheckCircle2, Users, DollarSign, TrendingUp } from "lucide-react";
 
 export function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#ebdebe] via-white to-[#f7c884]">
-      <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
-        <div className="text-2xl font-bold text-slate-800">FlatTrack</div>
-        <div className="flex items-center gap-4">
+    <div className="min-h-screen" style={{ backgroundColor: "#EEEBE3", fontFamily: "'Georgia', serif" }}>
+      {/* Nav */}
+      <nav
+        style={{ borderBottom: "2px solid #000" }}
+        className="flex items-center justify-between px-8 py-5 max-w-7xl mx-auto"
+      >
+        <div
+          className="text-3xl font-bold tracking-tight"
+          style={{ color: "#CA0013", letterSpacing: "-0.03em" }}
+        >
+          FlatTrack
+        </div>
+        <div className="flex items-center gap-3">
           <Link to="/login">
-            <Button variant="ghost" className="text-slate-700">
+            <Button
+              variant="ghost"
+              style={{ color: "#000", fontFamily: "inherit" }}
+              className="font-semibold"
+            >
               Log in
             </Button>
           </Link>
           <Link to="/login">
-            <Button variant="outline" className="border-slate-300 text-slate-700">
+            <Button
+              style={{
+                backgroundColor: "#CA0013",
+                color: "#EEEBE3",
+                border: "none",
+                fontFamily: "inherit",
+                borderRadius: "999px",
+              }}
+              className="font-semibold px-6"
+            >
               Sign up
             </Button>
           </Link>
         </div>
       </nav>
 
-      <section className="px-8 py-20 max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h1 className="text-5xl font-bold text-slate-900 leading-tight">
-              No more chasing rent. No more awkward money talks.
+      {/* Hero */}
+      <section className="px-8 py-24 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="space-y-8">
+            <h1
+              className="font-bold leading-none"
+              style={{
+                fontSize: "clamp(3rem, 6vw, 5.5rem)",
+                color: "#000",
+                letterSpacing: "-0.04em",
+                lineHeight: "1.0",
+              }}
+            >
+              <span style={{ color: "#CA0013", display: "block", fontSize: "1.1em" }}>
+                Flatting?
+              </span>
+              <span style={{ display: "block", marginTop: "0.15em" }}>
+                Not a Problem.
+              </span>
             </h1>
-            <p className="text-xl text-slate-600">
-              FlatTrack automatically tracks rent, bills, and shared spending—so your flat just
-              works.
+            <p
+              className="text-lg"
+              style={{ color: "#000", opacity: 0.65, maxWidth: "420px", lineHeight: "1.6" }}
+            >
+              FlatTrack automatically tracks rent, bills, and shared spending.
             </p>
             <div className="flex gap-4">
               <Link to="/login">
                 <Button
                   size="lg"
-                  className="bg-[#e19696] hover:bg-[#d18585] text-white px-8"
+                  style={{
+                    backgroundColor: "#CA0013",
+                    color: "#EEEBE3",
+                    border: "none",
+                    fontFamily: "inherit",
+                    letterSpacing: "0.02em",
+                    borderRadius: "999px",
+                    boxShadow: "0 8px 24px rgba(202,0,19,0.35)",
+                  }}
+                  className="px-8 font-semibold"
                 >
                   Get Started Free
                 </Button>
@@ -43,145 +90,261 @@ export function Landing() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-slate-300 text-slate-700"
+                style={{
+                  border: "2px solid #000",
+                  color: "#000",
+                  backgroundColor: "transparent",
+                  fontFamily: "inherit",
+                  borderRadius: "999px",
+                }}
+                className="font-semibold"
               >
                 See How It Works
               </Button>
             </div>
           </div>
-          <div className="bg-white/60 backdrop-blur-md rounded-3xl shadow-2xl p-8 border border-white/40">
+
+          {/* Hero Card */}
+          <div
+            style={{
+              backgroundColor: "#fff",
+              border: "1.5px solid rgba(0,0,0,0.10)",
+              borderRadius: "24px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06)",
+            }}
+            className="p-8"
+          >
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-[#c5c09a]/20 to-[#f7c884]/20 rounded-xl">
-                <span className="font-semibold text-slate-800">Rent Status</span>
-                <span className="text-emerald-600 font-bold">2/3 Paid ✓</span>
+              <div
+                style={{
+                  backgroundColor: "#EEEBE3",
+                  border: "1.5px solid rgba(0,0,0,0.10)",
+                  borderRadius: "14px",
+                }}
+                className="flex items-center justify-between p-4"
+              >
+                <span className="font-bold text-black" style={{ letterSpacing: "0.02em" }}>
+                  Rent Status
+                </span>
+                <span className="font-bold" style={{ color: "#CA0013" }}>
+                  2/3 Paid ✓
+                </span>
               </div>
               <div className="space-y-2">
-                <div className="flex items-center gap-3 p-3 bg-white/80 rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">
-                    J
+                {[
+                  { name: "Jordan", paid: true },
+                  { name: "Morgan", paid: true },
+                  { name: "Alex", paid: false },
+                ].map(({ name, paid }) => (
+                  <div
+                    key={name}
+                    style={{
+                      backgroundColor: paid ? "#EEEBE3" : "#fff",
+                      border: `1.5px solid ${paid ? "rgba(0,0,0,0.10)" : "rgba(202,0,19,0.35)"}`,
+                      borderRadius: "14px",
+                      boxShadow: paid ? "none" : "0 2px 12px rgba(202,0,19,0.08)",
+                    }}
+                    className="flex items-center gap-3 p-3"
+                  >
+                    <div
+                      style={{
+                        backgroundColor: paid ? "#000" : "#CA0013",
+                        color: "#EEEBE3",
+                        borderRadius: "10px",
+                        boxShadow: paid
+                          ? "0 2px 8px rgba(0,0,0,0.25)"
+                          : "0 2px 8px rgba(202,0,19,0.35)",
+                      }}
+                      className="w-9 h-9 flex items-center justify-center font-bold text-sm"
+                    >
+                      {name[0]}
+                    </div>
+                    <span className="flex-1 font-medium text-black">{name}</span>
+                    {paid ? (
+                      <CheckCircle2 className="w-5 h-5" style={{ color: "#000" }} />
+                    ) : (
+                      <span className="text-sm font-bold" style={{ color: "#CA0013" }}>
+                        Pending
+                      </span>
+                    )}
                   </div>
-                  <span className="flex-1 text-slate-700">Jordan</span>
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-white/80 rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">
-                    M
-                  </div>
-                  <span className="flex-1 text-slate-700">Morgan</span>
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center text-white font-bold">
-                    A
-                  </div>
-                  <span className="flex-1 text-slate-700">Alex</span>
-                  <span className="text-amber-600 text-sm font-semibold">Pending</span>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="px-8 py-20 bg-white/40 backdrop-blur-sm">
+      {/* Features */}
+      <section className="px-8 py-20">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-white/60">
-              <div className="w-12 h-12 bg-[#e19696] rounded-xl flex items-center justify-center mb-4">
-                <DollarSign className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">
-                Automatic Rent Tracking
-              </h3>
-              <p className="text-slate-600">
-                Connect your flat account and instantly see who's paid.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <div className="inline-flex items-center gap-2 text-sm text-emerald-600 font-semibold">
-                  All Paid ✅
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <DollarSign className="w-6 h-6" style={{ color: "#EEEBE3" }} />,
+                title: "Automatic Rent Tracking",
+                desc: "Connect your flat account and instantly see who's paid.",
+                badge: "All Paid ✅",
+              },
+              {
+                icon: <TrendingUp className="w-6 h-6" style={{ color: "#EEEBE3" }} />,
+                title: "Shared Expense Tracking",
+                desc: "Log and track shared costs like groceries in one place.",
+                badge: "On Track",
+              },
+              {
+                icon: <Users className="w-6 h-6" style={{ color: "#EEEBE3" }} />,
+                title: "Clear Payment Status",
+                desc: "No confusion—everyone can see what's owed at a glance.",
+                badge: null,
+                progress: true,
+              },
+            ].map(({ icon, title, desc, badge, progress }) => (
+              <div
+                key={title}
+                style={{
+                  backgroundColor: "#fff",
+                  border: "1.5px solid rgba(0,0,0,0.08)",
+                  borderRadius: "24px",
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)",
+                }}
+                className="p-8"
+              >
+                <div
+                  style={{
+                    backgroundColor: "#CA0013",
+                    borderRadius: "14px",
+                    boxShadow: "0 6px 20px rgba(202,0,19,0.35)",
+                  }}
+                  className="w-11 h-11 flex items-center justify-center mb-5"
+                >
+                  {icon}
+                </div>
+                <h3
+                  className="text-xl font-bold mb-3"
+                  style={{ color: "#000", letterSpacing: "-0.02em" }}
+                >
+                  {title}
+                </h3>
+                <p style={{ color: "#000", opacity: 0.6, lineHeight: "1.6" }}>{desc}</p>
+                <div
+                  style={{
+                    borderTop: "1px solid rgba(0,0,0,0.08)",
+                    marginTop: "1.5rem",
+                    paddingTop: "1.25rem",
+                  }}
+                >
+                  {badge && (
+                    <span className="text-sm font-bold" style={{ color: "#000" }}>
+                      {badge}
+                    </span>
+                  )}
+                  {progress && (
+                    <div
+                      style={{
+                        backgroundColor: "#EEEBE3",
+                        borderRadius: "999px",
+                        overflow: "hidden",
+                      }}
+                      className="h-2"
+                    >
+                      <div
+                        style={{
+                          backgroundColor: "#CA0013",
+                          width: "66%",
+                          borderRadius: "999px",
+                        }}
+                        className="h-full"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-white/60">
-              <div className="w-12 h-12 bg-[#c5c09a] rounded-xl flex items-center justify-center mb-4">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">
-                Shared Expense Tracking
-              </h3>
-              <p className="text-slate-600">
-                Log and track shared costs like groceries in one place.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <div className="text-sm text-slate-600">
-                  Flat Status: <span className="font-semibold text-slate-800">On Track</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-white/60">
-              <div className="w-12 h-12 bg-[#f7c884] rounded-xl flex items-center justify-center mb-4">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">Clear Payment Status</h3>
-              <p className="text-slate-600">
-                No confusion—everyone can see what's owed at a glance.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                  <div className="h-full w-2/3 bg-emerald-500 rounded-full"></div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="px-8 py-20 max-w-7xl mx-auto">
+      {/* How It Works */}
+      <section className="px-8 py-24 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-slate-900 mb-4">How It Works</h2>
-          <p className="text-xl text-slate-600">
+          <h2
+            className="font-bold mb-4"
+            style={{ fontSize: "clamp(2rem, 4vw, 3rem)", color: "#000", letterSpacing: "-0.03em" }}
+          >
+            How It Works
+          </h2>
+          <p style={{ color: "#000", opacity: 0.55, fontSize: "1.125rem" }}>
             No spreadsheets. No reminders. No stress.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-12 mb-16">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#e19696] to-[#f7c884] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-              1
+        <div className="grid md:grid-cols-3 gap-12 mb-20">
+          {[
+            { n: "1", title: "Connect flat account", sub: "Secure integration with Akahu API" },
+            { n: "2", title: "Invite flatmates via link", sub: "Share a simple invite link with your flat" },
+            { n: "3", title: "Track payments automatically", sub: "Sit back and let FlatTrack do the work" },
+          ].map(({ n, title, sub }) => (
+            <div key={n} className="text-center">
+              <div
+                style={{
+                  backgroundColor: "#CA0013",
+                  color: "#EEEBE3",
+                  borderRadius: "999px",
+                  width: "56px",
+                  height: "56px",
+                  fontSize: "1.5rem",
+                  fontWeight: "700",
+                  boxShadow: "0 8px 24px rgba(202,0,19,0.40)",
+                }}
+                className="flex items-center justify-center mx-auto mb-5"
+              >
+                {n}
+              </div>
+              <h3
+                className="text-xl font-bold mb-2"
+                style={{ color: "#000", letterSpacing: "-0.02em" }}
+              >
+                {title}
+              </h3>
+              <p style={{ color: "#000", opacity: 0.55 }}>{sub}</p>
             </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">
-              Connect flat account
-            </h3>
-            <p className="text-slate-600">Secure integration with Akahu API</p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#c5c09a] to-[#e19696] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-              2
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">Invite flatmates via link</h3>
-            <p className="text-slate-600">Share a simple invite link with your flat</p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#f7c884] to-[#c5c09a] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-              3
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">
-              Track payments automatically
-            </h3>
-            <p className="text-slate-600">Sit back and let FlatTrack do the work</p>
-          </div>
+          ))}
         </div>
 
-        <div className="text-center bg-gradient-to-r from-[#e19696] to-[#f7c884] rounded-3xl p-12 shadow-2xl">
-          <h2 className="text-3xl font-bold text-white mb-4">Start your stress-free flat</h2>
+        {/* CTA Banner */}
+        <div
+          style={{
+            backgroundColor: "#CA0013",
+            borderRadius: "28px",
+            boxShadow: "0 24px 64px rgba(202,0,19,0.35), 0 6px 20px rgba(0,0,0,0.10)",
+          }}
+          className="p-14 text-center"
+        >
+          <h2
+            className="font-bold mb-6"
+            style={{
+              color: "#EEEBE3",
+              fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Start your stress-free flat
+          </h2>
           <Link to="/app">
             <Button
               size="lg"
-              className="bg-white text-slate-800 hover:bg-slate-100 px-8"
+              style={{
+                backgroundColor: "#EEEBE3",
+                color: "#000",
+                border: "none",
+                fontFamily: "inherit",
+                fontWeight: "700",
+                letterSpacing: "0.02em",
+                borderRadius: "999px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.20)",
+              }}
+              className="px-10 transition-all hover:-translate-y-0.5"
             >
               Create Your Flat
             </Button>

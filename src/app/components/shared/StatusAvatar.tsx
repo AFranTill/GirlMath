@@ -8,7 +8,7 @@ interface StatusAvatarProps {
 }
 
 const statusColors = {
-  safe: "ring-emerald-500",
+  safe: "ring-[#E19898]",
   pending: "ring-amber-400",
   risk: "ring-red-500",
 };

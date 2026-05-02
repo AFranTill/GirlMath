@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Bauhaus+93:wght@400&display=swap');
+
+.bauhaus-font {
+    font-family: 'Bauhaus 93', sans-serif;
+}
+
+@font-face {
+    font-family: 'Bauhaus93';
+    src: url('/fonts/Bauhaus93.ttf') format('truetype');
+}
+
+.bauhaus-font {
+    font-family: 'Bauhaus93', sans-serif;
+}
