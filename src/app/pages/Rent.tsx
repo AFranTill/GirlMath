@@ -1,7 +1,70 @@
-import { GlassCard } from "../components/shared/GlassCard";
-import { StatusAvatar } from "../components/shared/StatusAvatar";
+import { useState } from "react";
+import { CheckCircle2, Bell } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
+
+// ─── Palette ────────────────────────────────────────────────────────────────
+// #EEEBE3  — off-white / background
+// #CA0013  — red accent
+// #000000  — black / text / primary
+// ────────────────────────────────────────────────────────────────────────────
+
+const flatmates = [
+  { name: "Amy", paid: true, amount: 650, paidDate: "Apr 28" },
+  { name: "Sam Taylor", paid: true, amount: 650, paidDate: "Apr 30" },
+  { name: "Jordan Lee", paid: false, amount: 650, paidDate: null },
+];
+
+// ─── Primitives ──────────────────────────────────────────────────────────────
+
+function GlassCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border border-black/10 shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-5 ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Progress({ value }: { value: number }) {
+  return (
+    <div className="h-3 w-full rounded-full bg-black/10 overflow-hidden">
+      <div
+        className="h-full rounded-full bg-black transition-all duration-500"
+        style={{ width: `${value}%` }}
+      />
+    </div>
+  );
+}
+
+function StatusAvatar({ name, status }: { name: string; status: "safe" | "pending" }) {
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  return (
+    <div
+      className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${status === "safe"
+        ? "bg-black text-[#EEEBE3]"
+        : "bg-[#CA0013] text-[#EEEBE3]"
+        }`}
+    >
+      {initials}
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 import { Progress } from "../components/ui/progress";
 import { CheckCircle2, Bell, AlertCircle, Loader } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -16,7 +79,6 @@ interface Flatmate {
 }
 
 export function Rent() {
-  const [nudgeOpen, setNudgeOpen] = useState(false);
   const [nudgedPerson, setNudgedPerson] = useState("");
   const [flatmates, setFlatmates] = useState<Flatmate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,10 +162,11 @@ export function Rent() {
   const progressPercent = totalRent > 0 ? (totalPaid / totalRent) * 100 : 0;
 
   return (
-    <div className="p-6 space-y-6 max-w-screen-lg mx-auto">
+    <div className="p-6 space-y-6 max-w-screen-lg mx-auto bg-[#EEEBE3] min-h-screen">
+      {/* Header */}
       <div className="pt-4">
-        <h1 className="text-2xl font-bold text-slate-800">Rent Payment</h1>
-        <p className="text-sm text-slate-600 mt-1">Due: May 5, 2026 (3 days remaining)</p>
+        <h1 className="text-2xl font-bold text-black">Rent Payment</h1>
+        <p className="text-sm text-black/50 mt-1">Due: May 5, 2026 (3 days remaining)</p>
       </div>
 
       {error && (
@@ -137,6 +200,14 @@ export function Rent() {
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Progress</span>
                 <span className="font-semibold"> 1 / {users.length} paid</span>
+              
+                    {/* Progress bar on red card uses white track / off-white fill */}
+                <div className="h-3 w-full rounded-full bg-[#EEEBE3]/25 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#EEEBE3] transition-all duration-500"
+                    style={{ width: "66.67%" }}
+                  />
+                </div>
               </div>
               <Progress value={progressPercent} className="h-3" />
             </div>
@@ -212,14 +283,13 @@ export function Rent() {
             </div>
           )}
 
-          <GlassCard className="bg-amber-50/80">
-            <h3 className="font-semibold text-slate-800 mb-2">Star Opportunity</h3>
-            <p className="text-sm text-slate-600">
-              If everyone pays by May 5th, the whole flat earns +1 Bonus Star! 🌟
-            </p>
-          </GlassCard>
-        </>
-      )}
+      {/* Star opportunity banner */}
+      <GlassCard className="bg-black">
+        <h3 className="font-semibold text-[#EEEBE3] mb-2">Star Opportunity</h3>
+        <p className="text-sm text-[#EEEBE3]/60">
+          If everyone pays by May 5th, the whole flat earns +1 Bonus Star!
+        </p>
+      </GlassCard>
     </div>
   );
 }
