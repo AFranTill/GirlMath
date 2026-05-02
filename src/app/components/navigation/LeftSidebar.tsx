@@ -4,7 +4,6 @@ import { Home, DollarSign, Zap, ShoppingCart, Trophy, User, LogOut, Star } from 
 import { Button } from "../ui/button";
 import { GlassCard } from "../shared/GlassCard";
 import { supabase } from "../../../lib/supabaseClient";
-import { useEffect, useState } from "react";
 
 const navItems = [
   { path: "/app", icon: Home, label: "Home" },

@@ -50,15 +50,14 @@ export function Dashboard() {
         }}
         className="p-4 flex items-start gap-3"
       >
-        <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "#CA0013" }} />
+
+      <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: "#CA0013" }} />
         <div className="flex-1">
           <p className="font-bold" style={{ color: "#000" }}>
-            Rent due in 5 days
+            Rent due in 3 days
           </p>
           <p className="text-sm" style={{ color: "#000", opacity: 0.55 }}>
-            {totalUsers > paidCount
-              ? `${users[paidCount]?.email.split("@")[0] || "Someone"} still needs to pay their share ($250)`
-              : "All rent payments are up to date"}
+            {totalUsers > paidCount ? `${users[paidCount]?.first_name || users[paidCount]?.email.split('@')[0] || 'Someone'} still needs to pay their share ($250)` : 'All rent payments are up to date'}
           </p>
         </div>
       </div>
@@ -82,7 +81,7 @@ export function Dashboard() {
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm mb-2">
-                  <span style={{ color: "#000", opacity: 0.45 }}>{paidCount}/{totalUsers} paid</span>
+                  <span style={{ color: "#000", opacity: 0.45 }}>1/{totalUsers} paid</span>
                   <span className="font-bold" style={{ color: "#000" }}>${paidAmount} / ${totalAmount}</span>
                 </div>
                 <div style={{ backgroundColor: "#EEEBE3", borderRadius: "99px" }} className="h-2.5 overflow-hidden">

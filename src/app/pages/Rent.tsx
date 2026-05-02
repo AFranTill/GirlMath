@@ -167,7 +167,7 @@ export function Rent() {
               </div>
               <div className="text-right">
                 <p className="text-sm text-slate-600">Collected</p>
-                <p className="text-2xl font-bold text-emerald-600">
+                <p className="text-2xl font-bold text-[#CA0013]">
                   ${totalPaid} / ${totalRent}
                 </p>
               </div>
@@ -176,7 +176,7 @@ export function Rent() {
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Progress</span>
                 <span className="font-semibold">
-                  {paidCount} / {users.length} paid
+                  1 / {users.length} paid
                 </span>
               </div>
               <Progress value={progressPercent} className="h-3" />
@@ -207,9 +207,9 @@ export function Rent() {
                     <div className="text-right">
                       {flatmate.paid ? (
                         <div className="flex items-center gap-2">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                          <CheckCircle2 className="w-5 h-5 text-[#EEEBE3]" />
                           <div>
-                            <p className="text-sm font-semibold text-emerald-600">Paid</p>
+                            <p className="text-sm font-semibold text-[#EEEBE3]">Paid</p>
                             <p className="text-xs text-slate-500">{flatmate.paidDate}</p>
                           </div>
                         </div>
